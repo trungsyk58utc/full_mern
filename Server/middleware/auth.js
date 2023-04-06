@@ -12,11 +12,15 @@ export const verifyToken = (req, res, next) => {
 
     else{
         try {
-            const decode = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET);
-            req.userId = decode.userId;
-            next();
+            const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            const current = new Date().getTime();
+
+            if (current < decode.exp * 1000){
+                req.userId = decode.userId;
+                next();
+            }
         } catch (error) {
-            res.status(500).json({
+            res.status(401).json({
                 error: "Access token invalid",
             })
         }
